@@ -1,6 +1,6 @@
 # IonicApp
-- show a list of cars
-- add or edit cars
+- show a list of cakes
+- add or edit cakes
 - authenticate user
 - provide offline support - persist data on the local storage
 - provide online support - synchronize data to/from a remote location

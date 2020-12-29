@@ -1,0 +1,35 @@
+.networkDiv{
+    color: cadetblue;
+    border: 1px solid white;
+    border-radius: 12px;
+    border-style: dotted;
+    border-color: blue;
+    height: 30px;
+}
+
+>ZZ
+.cakeList{
+    height: 40px;
+    color: #3dc2ff;
+    text-align: center;
+}
+
+.logoutButton{
+    background-color: #3dc2ff;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    height: 40px;
+}
+
+.selction{
+    background-color: #3dc2ff;
+    color: black;
+}
+
+.itemPage{
+    background-color: #3dc2ff;
+}
+.showButton{
+    background-color: #3dc2ff;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    height: 40px;
+}

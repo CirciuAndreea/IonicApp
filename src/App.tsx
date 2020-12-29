@@ -23,7 +23,7 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
-import { ItemProvider } from './todo/ItemProvider';
+import { CakeProvider } from './todo/CakeProvider';
 import {Login} from "./auth/Login";
 import {AuthProvider} from "./auth/AuthProvider";
 import {PrivateRoute} from "./auth/PrivateRoute";
@@ -33,11 +33,11 @@ const App: React.FC = () => (
             <IonRouterOutlet>
                 <AuthProvider>
                     <Route path="/login" component={Login} exact={true}/>
-                    <ItemProvider>
+                    <CakeProvider>
                         <PrivateRoute path="/items" component={ItemList} exact={true}/>
                         <PrivateRoute path="/item" component={ItemEdit} exact={true}/>
                         <PrivateRoute path="/item/:id" component={ItemEdit} exact={true}/>
-                    </ItemProvider>
+                    </CakeProvider>
                     <Route exact path="/" render={() => <Redirect to="/items"/>}/>
                 </AuthProvider>
             </IonRouterOutlet>

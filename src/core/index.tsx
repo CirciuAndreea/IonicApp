@@ -1,7 +1,9 @@
-export const baseUrl = 'localhost:3000';
+//export const baseUrl = 'localhost:3000';
+export const baseUrl = '192.168.1.5:3000';
 
-export const getLogger: (tag: string) => (...args: any) => void =
-    tag => (...args) => console.log(tag, ...args);
+export const getLogger:
+    (tag: string) => (...args: any) => void =
+    tag => (...args) => null;
 
 const log = getLogger('api');
 
@@ -17,7 +19,7 @@ export function withLogs<T>(promise: Promise<ResponseProps<T>>, fnName: string):
             return Promise.resolve(res.data);
         })
         .catch(err => {
-            log(`${fnName} - failed`);
+            log(`${fnName} - failed with error: ${err}`);
             return Promise.reject(err);
         });
 }

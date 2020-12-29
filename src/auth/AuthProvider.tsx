@@ -1,21 +1,27 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
-import { getLogger } from '../core';
-import { login as loginApi } from './authApi';
+import React, { useCallback, useEffect, useState } from "react";
+import PropTypes from "prop-types";
+import { getLogger } from "../core";
+import { login as loginApi } from "./authApi";
+import { Plugins } from "@capacitor/core";
 
-const log = getLogger('AuthProvider');
+const { Storage } = Plugins;
+
+const log = getLogger("AuthProvider");
 
 type LoginFn = (username?: string, password?: string) => void;
+type LogoutFn = () => void;
 
 export interface AuthState {
     authenticationError: Error | null;
     isAuthenticated: boolean;
     isAuthenticating: boolean;
     login?: LoginFn;
+    logout?: LogoutFn;
     pendingAuthentication?: boolean;
     username?: string;
     password?: string;
     token: string;
+    _id: string;
 }
 
 const initialState: AuthState = {
@@ -23,36 +29,63 @@ const initialState: AuthState = {
     isAuthenticating: false,
     authenticationError: null,
     pendingAuthentication: false,
-    token: '',
+    token: "",
+    _id: "",
 };
 
 export const AuthContext = React.createContext<AuthState>(initialState);
 
 interface AuthProviderProps {
-    children: PropTypes.ReactNodeLike,
+    children: PropTypes.ReactNodeLike;
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [state, setState] = useState<AuthState>(initialState);
-    const { isAuthenticated, isAuthenticating, authenticationError, pendingAuthentication, token } = state;
+    const {
+        isAuthenticated,
+        isAuthenticating,
+        authenticationError,
+        pendingAuthentication,
+        token,
+        _id
+    } = state;
     const login = useCallback<LoginFn>(loginCallback, []);
+    const logout = useCallback<LogoutFn>(logoutCallback, []);
     useEffect(authenticationEffect, [pendingAuthentication]);
-    const value = { isAuthenticated, login, isAuthenticating, authenticationError, token };
-    log('render');
-    return (
-        <AuthContext.Provider value={value}>
-            {children}
-        </AuthContext.Provider>
-    );
+    const value = {
+        isAuthenticated,
+        login,
+        logout,
+        isAuthenticating,
+        authenticationError,
+        token,
+        _id
+    };
+    log("render");
+    return <AuthContext.Provider value={value}>
+        {children}</AuthContext.Provider>;
 
     function loginCallback(username?: string, password?: string): void {
-        log('login');
+        log("login");
         setState({
             ...state,
             pendingAuthentication: true,
             username,
-            password
+            password,
         });
+    }
+    function logoutCallback(): void {
+        log("logout");
+        setState({
+            ...state,
+            isAuthenticated: false,
+            token: "",
+            _id: "",
+
+        });
+        (async () => {
+            await Storage.clear();
+        })();
     }
 
     function authenticationEffect() {
@@ -60,15 +93,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         authenticate();
         return () => {
             canceled = true;
-        }
+        };
 
         async function authenticate() {
+            var tokenStorage = await Storage.get({ key: "user" });
+            var _idStorage = await Storage.get({key: "_id"});
+            if (tokenStorage.value) {
+                setState({
+                    ...state,
+                    token: tokenStorage.value,
+                    _id: _idStorage.value!,
+                    pendingAuthentication: false,
+                    isAuthenticated: true,
+                    isAuthenticating: false,
+                });
+            }
             if (!pendingAuthentication) {
-                log('authenticate, !pendingAuthentication, return');
+                log("authenticate, !pendingAuthentication, return");
                 return;
             }
             try {
-                log('authenticate...');
+                log("authenticate...");
                 setState({
                     ...state,
                     isAuthenticating: true,
@@ -78,10 +123,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 if (canceled) {
                     return;
                 }
-                log('authenticate succeeded');
+                log("authenticate succeeded");
+                await Storage.set({ key: "user", value: token });
+                await Storage.set({key: "_id", value: _id})
                 setState({
                     ...state,
                     token,
+                    _id,
                     pendingAuthentication: false,
                     isAuthenticated: true,
                     isAuthenticating: false,
@@ -90,7 +138,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 if (canceled) {
                     return;
                 }
-                log('authenticate failed');
+                log("authenticate failed");
                 setState({
                     ...state,
                     authenticationError: error,
